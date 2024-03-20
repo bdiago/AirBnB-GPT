@@ -1,20 +1,23 @@
 import json
 import openai
 import requests
-import streamlit as st
-import pandas as pd
+import os
+# import streamlit as st
+# import pandas as pd
 import time
 import random
 from tenacity import retry, wait_random_exponential, stop_after_attempt
-from streamlit_extras.let_it_rain import rain
+# from streamlit_extras.let_it_rain import rain
 
-
+openai.api_key = os.getenv('OPENAI_API_KEY')
 GPT_MODEL = "gpt-3.5-turbo-0613"
 
 @retry(wait=wait_random_exponential(multiplier=1, max=40), stop=stop_after_attempt(3))
 def chat_completion_request(messages, tools=None, tool_choice=None, model=GPT_MODEL):
+    
     headers = {
         "Content-Type": "application/json",
+        # "Accept": "application/json",
         "Authorization": "Bearer " + openai.api_key,
     }
     json_data = {"model": model, "messages": messages}
@@ -28,6 +31,7 @@ def chat_completion_request(messages, tools=None, tool_choice=None, model=GPT_MO
             headers=headers,
             json=json_data,
         )
+        response.raise_for_status()
         return response
     except Exception as e:
         print("Unable to generate ChatCompletion response")
@@ -36,14 +40,14 @@ def chat_completion_request(messages, tools=None, tool_choice=None, model=GPT_MO
 
 tools = [
     {
-        "type": "function",
-        "function": {
-            "name": "check_for_resume_inquiry",
-            "description": "check if the user input is for the intent of seeing your resume.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "result": {
+  "type": "function",
+  "function": {
+    "name": "check_for_qna_inquiry",
+    "description": "Checks if the user's input can be answered with the provided QnA questions and returns a boolean true or false answer.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "result": {
                         "type": "boolean",
                         "description": "the true or false result"
                     }
@@ -51,7 +55,26 @@ tools = [
                  "required": ["result"],
             },
         }
+    },
+     {
+  "type": "function",
+  "function": {
+    "name": "check_for_qna_number",
+    "description": "Checks for the QnA number based on the users input.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "result": {
+                        "type": "integer",
+                        "description": "the Qna number"
+                    },
+                },
+                
+                 "required": ["result"],
+            },
+        }
     }
+
 ]
 
 def read_resume():
@@ -80,15 +103,14 @@ def standardize_resume_response(resume_info):
 
 
 def check_for_resume(input):
-    resume_doc = read_resume()
-    resume_info = strip_resume(resume_doc)
+    
 
     messages = []
-    #need to inset 
+    
     messages.append({"role": "system", "content": """You are engaging in dialog with a human.
-you tasked with understanding if the intent of their turn in the conversation is to see your resume. use this definition of what an intent is for your bases: "An intent categorizes an end-user's intention for one conversation turn."
 
-Below are 20 examples phrases of asking to see your resume:
+
+Below are frequently asked QnAs that you should use as context:
                      
 1. Is there a grocery store nearby, and if so, how far is it from the house?
 -Yes, there's a supermarket called FreshMart just a 5-minute drive away.
@@ -181,20 +203,21 @@ Below are 20 examples phrases of asking to see your resume:
 -Yes, there's a guest book on the coffee table where you can leave comments and suggestions. We appreciate your feedback!
 
 
-Determine if the next input by the user is for the intent of seeing your resume
+use this information to help answer functions calls.
 """})
     
     messages.append({"role": "user", "content": input})
     chat_response = chat_completion_request(
-        messages, tools=tools, tool_choice={"type": "function", "function": {"name": "check_for_resume_inquiry"}}
+        messages, tools=tools, tool_choice={"type": "function", "function": {"name": "check_for_qna_number"}}
     )
-    print(chat_response)
+    print(chat_response.json())
     chat_response = chat_response.json()["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"]
+    # print(chat_response)
 
-    resume_info = strip_resume(resume_doc)
+    
 
     print("input: "+input+" result: "+ str((json.loads(chat_response))["result"]))
-    return bool((json.loads(chat_response))["result"]), resume_info
+    return bool((json.loads(chat_response))["result"])
     
 
 
@@ -208,5 +231,5 @@ def add_balloons():
         falling_speed=5,
         animation_length="infinite",
     )
-
-
+ 
+yup = check_for_resume("Do you provide any breakfast or snack options for guests, and if yes, what is available?")
