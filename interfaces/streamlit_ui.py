@@ -2,6 +2,7 @@ import streamlit as st
 import time
 
 
+
 def converse(chatbot):
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": chatbot.greet()}]
@@ -26,8 +27,13 @@ def converse(chatbot):
                     time.sleep(0.005)  # Add a small delay to simulate streaming effect
                 message_placeholder.markdown(full_response)
            
-
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        if not chatbot.filepaths:
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
+        else:
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            for filepath in chatbot.filepaths:
+                st.image(filepath)
+            chatbot.filepaths = []
 
 
 

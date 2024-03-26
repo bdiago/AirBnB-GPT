@@ -39,23 +39,23 @@ def chat_completion_request(messages, tools=None, tool_choice=None, model=GPT_MO
         return e
 
 tools = [
-    {
-  "type": "function",
-  "function": {
-    "name": "check_for_qna_inquiry",
-    "description": "Checks if the user's input can be answered with the provided QnA questions and returns a boolean true or false answer.",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "result": {
-                        "type": "boolean",
-                        "description": "the true or false result"
-                    }
-                },
-                 "required": ["result"],
-            },
-        }
-    },
+#     {
+#   "type": "function",
+#   "function": {
+#     "name": "check_for_qna_inquiry",
+#     "description": "Checks if the user's input can be answered with the provided QnA questions and returns a boolean true or false answer.",
+#     "parameters": {
+#       "type": "object",
+#       "properties": {
+#         "result": {
+#                         "type": "boolean",
+#                         "description": "the true or false result"
+#                     }
+#                 },
+#                  "required": ["result"],
+#             },
+#         }
+#     },
      {
   "type": "function",
   "function": {
@@ -66,7 +66,7 @@ tools = [
       "properties": {
         "result": {
                         "type": "integer",
-                        "description": "the Qna number"
+                        "description": "the Qna number."
                     },
                 },
                 
@@ -77,32 +77,10 @@ tools = [
 
 ]
 
-def read_resume():
-        with open("data/resume.txt") as f:
-            resume = f.read()
-        return resume 
 
-def strip_resume(resume_doc):
-
-    try:
-        # Find the text after "RESUME:"
-        start = resume_doc.index("RESUME:") + len("RESUME:")
-        # Find the text before "PERSONAL INFO:"
-        end = resume_doc.index("PERSONAL INFO:", start)
-        # Extract the text between "RESUME:" and "PERSONAL INFO:"
-        resume_info = resume_doc[start:end].strip()
-        return resume_info
-        
-    except ValueError:
-        resume_info = "The text does not contain 'RESUME:' or 'PERSONAL INFO:'"
-        return resume_info
     
-def standardize_resume_response(resume_info):
-    
-    return "Sure! here you go: \n\n {} \n\nLet me know if there anything specific you would like to know or discuss!".format(resume_info)
 
-
-def check_for_resume(input):
+def check_for_qa_number(input):
     
 
     messages = []
@@ -217,10 +195,24 @@ use this information to help answer functions calls.
     
 
     print("input: "+input+" result: "+ str((json.loads(chat_response))["result"]))
-    return bool((json.loads(chat_response))["result"])
-    
+    return int((json.loads(chat_response))["result"])
 
 
+
+def find_files_in_dir(dir_name, base_dir):
+    dir_name = str(dir_name)  # Convert the integer to a string to compare with directory names
+    print( dir_name + base_dir)
+    for root, dirs, files in os.walk(base_dir):
+        if os.path.basename(root) == dir_name:
+            print("found directory: "+root)  
+            return [os.path.join(root, file) for file in files]
+    return []
+
+
+# files = find_files_in_dir("1", "pictures")
+# for file in files:
+#     print(file)
+   
 def add_balloons():
 
     emoji_list = ["🎈","🔥","💯","🤖"]
@@ -232,4 +224,4 @@ def add_balloons():
         animation_length="infinite",
     )
  
-yup = check_for_resume("Do you provide any breakfast or snack options for guests, and if yes, what is available?")
+# yup = check_for_qa_number("who is the president of the united states")
