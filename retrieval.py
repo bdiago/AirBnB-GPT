@@ -1,5 +1,6 @@
 import time
 import openai
+import streamlit as st
 from function_tools import check_for_qa_number, find_files_in_dir
 
 class VirtualAssistant:
@@ -11,6 +12,7 @@ class VirtualAssistant:
         # self.retrieval_docs = retrieval_docs
         # self.summary_type = summary_type
         self.filepaths = []
+        openai.api_key = st.secrets["OPENAI_API_KEY"]
         self.client = openai.OpenAI()
         file = self.client.files.create(
             file=open("OG/qna.txt", "rb"),

@@ -71,8 +71,8 @@ def main():
             st.markdown("""*This AI assistant references details to simulate conversation. It's not a real person,
                          so some info might be wrong. AI can sometimes generate unexpected responses. Use it for fun.*""")
             st.markdown(f"**chatbot type**: *{args.chatbot_type}*")
-            if st.button('Chaos Mode'):
-                add_balloons()
+            # if st.button('Chaos Mode'):
+            #     add_balloons()
             
             app = Streamlit(chatbot=chatbot)
     else:
