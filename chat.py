@@ -19,31 +19,17 @@ def create_chatbot():
 def main():
     #change your character defualts here
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--corpus", type=str, default="data/resume.txt"
-    )
+    
     parser.add_argument(
         "--character_name",
         type=str, 
-        default="RyanThiago"
+        default="Jon"
     )
     parser.add_argument(
         "--chatbot_type",
         type=str,
         default="retrieval",
         choices=["summary", "retrieval", "summary_retrieval"],
-    )
-    parser.add_argument(
-        "--summary_type",
-        type=str,
-        default="map_reduce",
-        choices=["map_reduce", "refine"],
-    )
-    parser.add_argument(
-        "--retrieval_docs",
-        type=str,
-        default="raw",
-        choices=["raw", "summarized"],
     )
     parser.add_argument(
         "--interface", type=str, default="streamlit", choices=["cli", "streamlit"]
